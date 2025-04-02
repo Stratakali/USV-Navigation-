@@ -30,7 +30,9 @@ A modular mission planning and execution system for Uncrewed Surface Vehicles (U
 
 - Real-time logging and status reporting
 
-- 
 
+![Image Mar 28, 2025, 09_30_37 AM](https://github.com/user-attachments/assets/9097d02c-b891-488e-a947-16c909437b74)
+
+USV image 
 
 for more information contact oceanova email info@oceanova.nz      https://oceanova.nz/
