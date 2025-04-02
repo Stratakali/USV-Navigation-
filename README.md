@@ -30,8 +30,9 @@ A modular mission planning and execution system for Uncrewed Surface Vehicles (U
 
 - Real-time logging and status reporting
 
+![Image Mar 27, 2025, 10_51_38 PM](https://github.com/user-attachments/assets/4d046df6-5772-4f19-b272-e07660c179b5)
 
-![Image Mar 28, 2025, 09_30_37 AM](https://github.com/user-attachments/assets/9097d02c-b891-488e-a947-16c909437b74)
+
 
 USV image 
 
