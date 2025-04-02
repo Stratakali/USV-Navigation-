@@ -15,3 +15,4 @@ A modular mission planning and execution system for Uncrewed Surface Vehicles (U
 - Real-time logging and status reporting
 
 
+for more information contact oceanova email info@oceanova.nz      https://oceanova.nz/
