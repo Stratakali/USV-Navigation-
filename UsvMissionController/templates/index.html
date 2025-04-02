@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USV Mission Planner</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin=""></script>
+    <style>
+        body {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .mission-card {
+            margin-bottom: 1rem;
+        }
+        pre.log-output {
+            background-color: #212529;
+            color: #f8f9fa;
+            border: 1px solid #495057;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.875rem;
+            font-family: monospace;
+        }
+        .mission-item {
+            border-left: 4px solid var(--bs-info);
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .btn-toolbar {
+            margin-bottom: 1.5rem;
+        }
+        .risk-level {
+            display: inline-block;
+            width: 100%;
+            height: 30px;
+            border-radius: 4px;
+            position: relative;
+        }
+        .risk-level-label {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 2px rgba(0,0,0,0.7);
+            line-height: 30px;
+        }
+        .risk-level-low {
+            background-color: #198754; /* Bootstrap success color */
+        }
+        .risk-level-medium {
+            background-color: #ffc107; /* Bootstrap warning color */
+        }
+        .risk-level-high {
+            background-color: #fd7e14; /* Bootstrap orange color */
+        }
+        .risk-level-critical {
+            background-color: #dc3545; /* Bootstrap danger color */
+        }
+        .risk-factor {
+            margin-bottom: 10px;
+            border-left: 4px solid #6c757d;
+            padding-left: 10px;
+        }
+        .risk-factor.low {
+            border-color: #198754;
+        }
+        .risk-factor.medium {
+            border-color: #ffc107;
+        }
+        .risk-factor.high {
+            border-color: #fd7e14;
+        }
+        .risk-factor.critical {
+            border-color: #dc3545;
+        }
+        .risk-assessment-panel {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        #map-container {
+            height: 500px;
+            border-radius: 0.375rem;
+            z-index: 1;
+        }
+        .map-controls {
+            margin-top: 10px;
+        }
+        .usv-marker {
+            background-color: #007bff;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid white;
+        }
+        .waypoint-marker {
+            background-color: #28a745;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid white;
+        }
+        .station-marker {
+            background-color: #dc3545;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid white;
+        }
+        .dock-marker {
+            background-color: #fd7e14;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid white;
+        }
+        .heading-indicator {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 20px solid rgba(255, 255, 255, 0.8);
+            transform-origin: center bottom;
+        }
+        .distance-label {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 12px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        .distance-label-container {
+            background: none !important;
+        }
+        /* We keep our custom styles from above and remove duplicates */
+        .range-ring {
+            border: 2px dashed rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            box-sizing: border-box;
+        }
+        
+        /* Custom Leaflet dark theme overrides */
+        .leaflet-container {
+            background-color: #343a40;
+        }
+        .leaflet-tile-pane {
+            filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+        }
+        .leaflet-control {
+            background-color: #212529;
+            color: #fff;
+            border-color: #495057;
+        }
+        .leaflet-control a {
+            color: #adb5bd;
+        }
+        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+            color: #adb5bd !important;
+            background-color: #212529 !important;
+        }
+        .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
+            color: #fff !important;
+            background-color: #343a40 !important;
+        }
+        .leaflet-control-attribution {
+            background-color: rgba(33, 37, 41, 0.8) !important;
+            color: #6c757d !important;
+        }
+        .leaflet-control-attribution a {
+            color: #6c757d !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="pb-3 mb-4 border-bottom">
+            <div class="d-flex align-items-center">
+                <img src="https://via.placeholder.com/40/003366/FFFFFF?text=USV" alt="USV Icon" class="me-3">
+                <h1 class="fs-4">USV Mission Planner</h1>
+            </div>
+        </header>
+
+        <!-- Live Map Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="fs-5 mb-0">Live Map Visualization</h2>
+                        <div>
+                            <div class="form-check form-switch d-inline-block me-2">
+                                <input class="form-check-input" type="checkbox" id="range-rings-toggle" checked>
+                                <label class="form-check-label small" for="range-rings-toggle">Range Rings</label>
+                            </div>
+                            <div class="form-check form-switch d-inline-block me-2">
+                                <input class="form-check-input" type="checkbox" id="bearing-toggle" checked>
+                                <label class="form-check-label small" for="bearing-toggle">Bearing Indicators</label>
+                            </div>
+                            <button id="add-waypoint-btn" class="btn btn-sm btn-outline-primary">Add Waypoint</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="map-container"></div>
+                        <div class="map-controls">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" id="waypoint-name" placeholder="Waypoint Name">
+                                        <input type="text" class="form-control" id="waypoint-lat" placeholder="Latitude">
+                                        <input type="text" class="form-control" id="waypoint-lng" placeholder="Longitude">
+                                        <button class="btn btn-outline-secondary" type="button" id="manual-add-waypoint-btn">Add</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button id="clear-waypoints-btn" class="btn btn-sm btn-outline-danger">Clear Custom Waypoints</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="fs-5 mb-0">Control Panel</h2>
+                        <span id="status-badge" class="badge bg-secondary">Not Running</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="btn-toolbar">
+                            <button id="start-btn" class="btn btn-primary me-2">Start Mission Planner</button>
+                            <button id="stop-btn" class="btn btn-danger me-2" disabled>Stop Mission Planner</button>
+                            <div class="form-check form-switch ms-2 d-flex align-items-center">
+                                <input class="form-check-input me-2" type="checkbox" id="display-toggle">
+                                <label class="form-check-label" for="display-toggle">Enable Visualization</label>
+                            </div>
+                        </div>
+                        
+                        <h3 class="fs-5">Mission Log</h3>
+                        <pre id="log-output" class="log-output">Waiting for mission planner to start...</pre>
+                    </div>
+                </div>
+                
+                <!-- Risk Assessment Panel -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="fs-5 mb-0">Risk Assessment</h2>
+                        <button id="assess-risks-btn" class="btn btn-sm btn-outline-info">Assess Mission Risks</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="mission-select" class="form-label">Mission</label>
+                            <select class="form-select" id="mission-select">
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="env-condition-select" class="form-label">Environmental Conditions</label>
+                            <select class="form-select" id="env-condition-select">
+                                <option value="good">Good Conditions</option>
+                                <option value="moderate">Moderate Conditions</option>
+                                <option value="poor">Poor Conditions</option>
+                            </select>
+                        </div>
+                        
+                        <div id="risk-assessment-summary" class="d-none">
+                            <!-- Risk summary will be inserted here -->
+                        </div>
+                        
+                        <div id="risk-assessment-details" class="risk-assessment-panel d-none">
+                            <!-- Risk details will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2 class="fs-5 mb-0">Mission Sequence</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="mission-list">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="fs-5 mb-0">System Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>System:</strong> USV Mission Planner v1.0
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Location:</strong> New Zealand Waters
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Mission Type:</strong> Combined (Waypoint, Station Keeping, Docking)
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Status:</strong> <span id="status-text">Ready</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const displayToggle = document.getElementById('display-toggle');
+            const logOutput = document.getElementById('log-output');
+            const statusBadge = document.getElementById('status-badge');
+            const statusText = document.getElementById('status-text');
+            const missionList = document.getElementById('mission-list');
+            
+            // Risk assessment elements
+            const missionSelect = document.getElementById('mission-select');
+            const envConditionSelect = document.getElementById('env-condition-select');
+            const assessRisksBtn = document.getElementById('assess-risks-btn');
+            const riskAssessmentSummary = document.getElementById('risk-assessment-summary');
+            const riskAssessmentDetails = document.getElementById('risk-assessment-details');
+            
+            // Map elements
+            const rangeRingsToggle = document.getElementById('range-rings-toggle');
+            const bearingToggle = document.getElementById('bearing-toggle');
+            const addWaypointBtn = document.getElementById('add-waypoint-btn');
+            const manualAddWaypointBtn = document.getElementById('manual-add-waypoint-btn');
+            const clearWaypointsBtn = document.getElementById('clear-waypoints-btn');
+            const waypointNameInput = document.getElementById('waypoint-name');
+            const waypointLatInput = document.getElementById('waypoint-lat');
+            const waypointLngInput = document.getElementById('waypoint-lng');
+            
+            let missionsData = [];
+            
+            // Load missions
+            fetch('/missions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        missionsData = data.missions;
+                        displayMissions(missionsData);
+                        populateMissionSelect(missionsData);
+                    }
+                })
+                .catch(error => console.error('Error loading missions:', error));
+            
+            // Start planner
+            startBtn.addEventListener('click', function() {
+                const formData = new FormData();
+                formData.append('display', displayToggle.checked.toString());
+                
+                fetch('/start-planner', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        startBtn.disabled = true;
+                        stopBtn.disabled = false;
+                        updateStatus('running');
+                        pollLogs();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error starting planner:', error));
+            });
+            
+            // Stop planner
+            stopBtn.addEventListener('click', function() {
+                fetch('/stop-planner', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        startBtn.disabled = false;
+                        stopBtn.disabled = true;
+                        updateStatus('stopped');
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error stopping planner:', error));
+            });
+            
+            // Risk assessment
+            assessRisksBtn.addEventListener('click', function() {
+                const missionIndex = parseInt(missionSelect.value);
+                const envCondition = envConditionSelect.value;
+                
+                // Show loading state
+                assessRisksBtn.disabled = true;
+                assessRisksBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Assessing...';
+                
+                // API call to assess risks
+                fetch('/assess-mission-risks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mission_index: missionIndex,
+                        env_condition: envCondition
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        displayRiskAssessment(data.risk_assessment);
+                    } else {
+                        alert(data.message);
+                    }
+                    
+                    // Reset button
+                    assessRisksBtn.disabled = false;
+                    assessRisksBtn.textContent = 'Assess Mission Risks';
+                })
+                .catch(error => {
+                    console.error('Error assessing risks:', error);
+                    alert('Error assessing risks: ' + error.message);
+                    
+                    // Reset button
+                    assessRisksBtn.disabled = false;
+                    assessRisksBtn.textContent = 'Assess Mission Risks';
+                });
+            });
+            
+            // Poll logs
+            function pollLogs() {
+                fetch('/planner-logs')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            logOutput.textContent = data.logs;
+                            logOutput.scrollTop = logOutput.scrollHeight;
+                        }
+                    })
+                    .catch(error => console.error('Error fetching logs:', error));
+                
+                // Check status
+                fetch('/planner-status')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'running') {
+                            updateStatus('running');
+                            setTimeout(pollLogs, 2000);
+                        } else if (data.status === 'completed') {
+                            updateStatus('completed');
+                            startBtn.disabled = false;
+                            stopBtn.disabled = true;
+                        } else {
+                            updateStatus('not_running');
+                            startBtn.disabled = false;
+                            stopBtn.disabled = true;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking status:', error);
+                        setTimeout(pollLogs, 5000);
+                    });
+            }
+            
+            // Update status display
+            function updateStatus(status) {
+                switch(status) {
+                    case 'running':
+                        statusBadge.className = 'badge bg-success';
+                        statusBadge.textContent = 'Running';
+                        statusText.textContent = 'Running';
+                        break;
+                    case 'completed':
+                        statusBadge.className = 'badge bg-info';
+                        statusBadge.textContent = 'Completed';
+                        statusText.textContent = 'Completed';
+                        break;
+                    case 'stopped':
+                        statusBadge.className = 'badge bg-warning';
+                        statusBadge.textContent = 'Stopped';
+                        statusText.textContent = 'Stopped';
+                        break;
+                    default:
+                        statusBadge.className = 'badge bg-secondary';
+                        statusBadge.textContent = 'Not Running';
+                        statusText.textContent = 'Ready';
+                }
+            }
+            
+            // Display missions
+            function displayMissions(missions) {
+                missionList.innerHTML = '';
+                
+                missions.forEach((mission, index) => {
+                    const missionItem = document.createElement('div');
+                    missionItem.className = 'mission-item';
+                    
+                    let content = `<h5 class="mb-1">${index + 1}. ${mission.type.charAt(0).toUpperCase() + mission.type.slice(1)} Mission</h5>`;
+                    content += `<p class="mb-1">${mission.description}</p>`;
+                    
+                    if (mission.type === 'waypoint') {
+                        content += '<ul class="list-unstyled small">';
+                        mission.waypoints.forEach(wp => {
+                            content += `<li>• ${wp.name} (${wp.lat.toFixed(4)}, ${wp.lng.toFixed(4)})</li>`;
+                        });
+                        content += '</ul>';
+                    } else if (mission.type === 'station_keeping') {
+                        content += `<p class="small">Location: ${mission.location.name} (${mission.location.lat.toFixed(4)}, ${mission.location.lng.toFixed(4)})<br>`;
+                        content += `Duration: ${mission.duration} seconds</p>`;
+                    } else if (mission.type === 'docking') {
+                        content += `<p class="small">Location: ${mission.location.name} (${mission.location.lat.toFixed(4)}, ${mission.location.lng.toFixed(4)})<br>`;
+                        content += `Heading: ${mission.heading}°</p>`;
+                    }
+                    
+                    missionItem.innerHTML = content;
+                    missionList.appendChild(missionItem);
+                });
+            }
+            
+            // Populate mission select dropdown
+            function populateMissionSelect(missions) {
+                missionSelect.innerHTML = '';
+                
+                missions.forEach((mission, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `${mission.type.charAt(0).toUpperCase() + mission.type.slice(1)} Mission - ${mission.description.substring(0, 30)}...`;
+                    missionSelect.appendChild(option);
+                });
+            }
+            
+            // Display risk assessment results
+            function displayRiskAssessment(assessment) {
+                // Show the risk assessment panels
+                riskAssessmentSummary.classList.remove('d-none');
+                riskAssessmentDetails.classList.remove('d-none');
+                
+                // Create the summary display
+                const missionType = assessment.mission_type.charAt(0).toUpperCase() + assessment.mission_type.slice(1);
+                const envCondition = assessment.env_condition.charAt(0).toUpperCase() + assessment.env_condition.slice(1);
+                const overallRisk = assessment.overall_risk_level;
+                
+                let summaryHTML = `
+                    <div class="alert ${getAlertClassForRiskLevel(overallRisk)}" role="alert">
+                        <h4 class="alert-heading">${overallRisk.toUpperCase()} Overall Risk</h4>
+                        <p>${missionType} mission in ${envCondition} conditions</p>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <span>LOW: ${assessment.risk_summary.LOW}</span>
+                            <span>MEDIUM: ${assessment.risk_summary.MEDIUM}</span>
+                            <span>HIGH: ${assessment.risk_summary.HIGH}</span>
+                            <span>CRITICAL: ${assessment.risk_summary.CRITICAL}</span>
+                        </div>
+                    </div>
+                `;
+                
+                riskAssessmentSummary.innerHTML = summaryHTML;
+                
+                // Create the detailed risk factors
+                let detailsHTML = `<h4 class="fs-6 mb-3">Detailed Risk Factors</h4>`;
+                
+                assessment.risk_factors.forEach(factor => {
+                    detailsHTML += `
+                        <div class="risk-factor ${factor.level.toLowerCase()}">
+                            <h5 class="fs-6 mb-1">${factor.name} - <span class="badge ${getBadgeClassForRiskLevel(factor.level)}">${factor.level}</span></h5>
+                            <p class="mb-1 small">${factor.description}</p>
+                            <p class="mb-1 small text-secondary"><strong>Mitigation:</strong> ${factor.mitigation}</p>
+                        </div>
+                    `;
+                });
+                
+                riskAssessmentDetails.innerHTML = detailsHTML;
+            }
+            
+            // Helper functions for risk levels
+            function getAlertClassForRiskLevel(level) {
+                switch(level.toLowerCase()) {
+                    case 'low': return 'alert-success';
+                    case 'medium': return 'alert-warning';
+                    case 'high': return 'alert-warning';
+                    case 'critical': return 'alert-danger';
+                    default: return 'alert-secondary';
+                }
+            }
+            
+            function getBadgeClassForRiskLevel(level) {
+                switch(level.toLowerCase()) {
+                    case 'low': return 'bg-success';
+                    case 'medium': return 'bg-warning';
+                    case 'high': return 'bg-warning text-dark';
+                    case 'critical': return 'bg-danger';
+                    default: return 'bg-secondary';
+                }
+            }
+            
+            // Initial status check
+            fetch('/planner-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'running') {
+                        startBtn.disabled = true;
+                        stopBtn.disabled = false;
+                        updateStatus('running');
+                        pollLogs();
+                    } else {
+                        updateStatus('not_running');
+                    }
+                })
+                .catch(error => console.error('Error checking initial status:', error));
+            
+            // Map implementation
+            // Initialize map with New Zealand as center
+            const map = L.map('map-container').setView([-41.2865, 174.7762], 6);
+            
+            // Add dark-themed map tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Store markers and visual elements
+            const markers = {
+                waypoints: [],
+                customWaypoints: [],
+                usv: null,
+                station: null,
+                dock: null
+            };
+            
+            // Store visual elements
+            let pathLine = null;
+            let rangeRings = [];
+            let headingIndicator = null;
+            let addingWaypoint = false;
+            
+            // Initialize the map with mission data
+            function initializeMap(missions) {
+                // Clear existing markers
+                clearMapMarkers();
+                
+                missions.forEach(mission => {
+                    if (mission.type === 'waypoint') {
+                        // Add waypoint markers
+                        mission.waypoints.forEach((wp, index) => {
+                            const marker = createWaypointMarker(wp.lat, wp.lng, wp.name, index + 1);
+                            markers.waypoints.push(marker);
+                        });
+                        
+                        // Create path line connecting the waypoints with distance information
+                        const pathPoints = mission.waypoints.map(wp => [wp.lat, wp.lng]);
+                        
+                        // Create solid tracklines with distance information
+                        pathLine = L.polyline(pathPoints, {
+                            color: '#3388ff',
+                            weight: 3,
+                            opacity: 0.9
+                        }).addTo(map);
+                        
+                        // Add distance labels to track segments
+                        for (let i = 0; i < pathPoints.length - 1; i++) {
+                            const start = L.latLng(pathPoints[i][0], pathPoints[i][1]);
+                            const end = L.latLng(pathPoints[i + 1][0], pathPoints[i + 1][1]);
+                            const distance = start.distanceTo(end); // in meters
+                            
+                            // Calculate midpoint for label
+                            const midLat = (pathPoints[i][0] + pathPoints[i + 1][0]) / 2;
+                            const midLng = (pathPoints[i][1] + pathPoints[i + 1][1]) / 2;
+                            
+                            // Format distance (km if >= a kilometer, otherwise meters)
+                            let distanceText = '';
+                            if (distance >= 1000) {
+                                distanceText = `${(distance / 1000).toFixed(2)} km`;
+                            } else {
+                                distanceText = `${Math.round(distance)} m`;
+                            }
+                            
+                            // Create a marker with the distance as a tooltip
+                            const distanceMarker = L.marker([midLat, midLng], {
+                                icon: L.divIcon({
+                                    html: `<div class="distance-label">${distanceText}</div>`,
+                                    className: 'distance-label-container',
+                                    iconSize: [80, 20],
+                                    iconAnchor: [40, 10]
+                                })
+                            }).addTo(map);
+                            
+                            // Add the distance marker to the waypoints array to clear it along with other elements
+                            markers.waypoints.push(distanceMarker);
+                        }
+                    } 
+                    else if (mission.type === 'station_keeping') {
+                        // Add station keeping marker
+                        markers.station = createStationMarker(
+                            mission.location.lat, 
+                            mission.location.lng, 
+                            mission.location.name
+                        );
+                        
+                        // Add range ring for tolerance radius (example: 50m)
+                        addRangeRing(mission.location.lat, mission.location.lng, 50);
+                    } 
+                    else if (mission.type === 'docking') {
+                        // Add docking marker
+                        markers.dock = createDockMarker(
+                            mission.location.lat, 
+                            mission.location.lng, 
+                            mission.location.name,
+                            mission.heading
+                        );
+                        
+                        // Add approach vector
+                        const headingRad = (mission.heading * Math.PI) / 180;
+                        const approachDistance = 100; // meters
+                        const approachLat = mission.location.lat - (approachDistance / 111111) * Math.cos(headingRad);
+                        const approachLng = mission.location.lng - (approachDistance / (111111 * Math.cos(mission.location.lat * Math.PI / 180))) * Math.sin(headingRad);
+                        
+                        // Draw approach line
+                        L.polyline(
+                            [[approachLat, approachLng], [mission.location.lat, mission.location.lng]], 
+                            {color: 'orange', weight: 3, dashArray: '10, 10'}
+                        ).addTo(map);
+                    }
+                });
+                
+                // Add USV marker with default position in New Zealand
+                markers.usv = createUSVMarker(-41.2865, 174.7762, 0);
+                
+                // Start polling USV position
+                pollUSVPosition();
+            }
+            
+            // Poll USV position
+            function pollUSVPosition() {
+                fetch('/usv-state')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            updateUSVMarker(data.usv_state);
+                        }
+                    })
+                    .catch(error => console.error('Error polling USV position:', error));
+                
+                // Poll every 1 second
+                setTimeout(pollUSVPosition, 1000);
+            }
+            
+            // Update USV marker position and heading
+            function updateUSVMarker(state) {
+                const { position, heading, active } = state;
+                
+                if (markers.usv) {
+                    // Update marker position
+                    markers.usv.setLatLng([position.lat, position.lng]);
+                    
+                    // Update heading indicator
+                    if (headingIndicator) {
+                        headingIndicator.remove();
+                    }
+                    
+                    if (bearingToggle.checked) {
+                        // Create heading indicator
+                        const headingMarker = document.createElement('div');
+                        headingMarker.className = 'heading-indicator';
+                        headingMarker.style.transform = `rotate(${heading}deg)`;
+                        
+                        headingIndicator = L.marker([position.lat, position.lng], {
+                            icon: L.divIcon({
+                                html: headingMarker,
+                                className: 'heading-indicator-container',
+                                iconSize: [20, 20],
+                                iconAnchor: [10, 0]
+                            }),
+                            zIndexOffset: 1000
+                        }).addTo(map);
+                    }
+                    
+                    // Update tooltip
+                    markers.usv.setTooltipContent(`
+                        USV<br>
+                        Position: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}<br>
+                        Heading: ${heading.toFixed(1)}°<br>
+                        Status: ${active ? 'Active' : 'Inactive'}
+                    `);
+                }
+            }
+            
+            // Create a waypoint marker
+            function createWaypointMarker(lat, lng, name, index, isCustom = false) {
+                const size = 24;
+                const element = document.createElement('div');
+                element.className = 'waypoint-marker';
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                element.style.lineHeight = `${size}px`;
+                element.innerHTML = index;
+                
+                const marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        html: element,
+                        className: '',
+                        iconSize: [size, size]
+                    }),
+                    draggable: isCustom
+                }).addTo(map);
+                
+                marker.bindTooltip(`Waypoint ${index}: ${name}<br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+                
+                if (isCustom) {
+                    marker.on('dragend', function(event) {
+                        const position = marker.getLatLng();
+                        marker.setTooltipContent(`Waypoint ${index}: ${name}<br>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`);
+                    });
+                }
+                
+                return marker;
+            }
+            
+            // Create a station keeping marker
+            function createStationMarker(lat, lng, name) {
+                const size = 24;
+                const element = document.createElement('div');
+                element.className = 'station-marker';
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                element.style.lineHeight = `${size}px`;
+                element.innerHTML = 'S';
+                
+                const marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        html: element,
+                        className: '',
+                        iconSize: [size, size]
+                    })
+                }).addTo(map);
+                
+                marker.bindTooltip(`Station: ${name}<br>${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+                
+                return marker;
+            }
+            
+            // Create a docking marker
+            function createDockMarker(lat, lng, name, heading) {
+                const size = 24;
+                const element = document.createElement('div');
+                element.className = 'dock-marker';
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                element.style.lineHeight = `${size}px`;
+                element.innerHTML = 'D';
+                
+                const marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        html: element,
+                        className: '',
+                        iconSize: [size, size]
+                    })
+                }).addTo(map);
+                
+                marker.bindTooltip(`Dock: ${name}<br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br>Heading: ${heading}°`);
+                
+                return marker;
+            }
+            
+            // Create a USV marker
+            function createUSVMarker(lat, lng, heading) {
+                const size = 28;
+                const element = document.createElement('div');
+                element.className = 'usv-marker';
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                element.style.lineHeight = `${size}px`;
+                element.innerHTML = 'USV';
+                
+                const marker = L.marker([lat, lng], {
+                    icon: L.divIcon({
+                        html: element,
+                        className: '',
+                        iconSize: [size, size]
+                    }),
+                    zIndexOffset: 1000
+                }).addTo(map);
+                
+                marker.bindTooltip(`USV<br>Position: ${lat.toFixed(6)}, ${lng.toFixed(6)}<br>Heading: ${heading.toFixed(1)}°`);
+                
+                return marker;
+            }
+            
+            // Add a range ring around a position
+            function addRangeRing(lat, lng, radiusMeters) {
+                if (rangeRingsToggle.checked) {
+                    const radiusPixels = radiusMeters / map.getZoom();
+                    const ring = L.circle([lat, lng], {
+                        radius: radiusMeters,
+                        fill: false,
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        dashArray: '5, 10'
+                    }).addTo(map);
+                    
+                    rangeRings.push(ring);
+                    return ring;
+                }
+                return null;
+            }
+            
+            // Clear all markers from the map
+            function clearMapMarkers() {
+                // Remove waypoint markers
+                markers.waypoints.forEach(marker => marker.remove());
+                markers.waypoints = [];
+                
+                // Remove custom waypoint markers
+                markers.customWaypoints.forEach(marker => marker.remove());
+                markers.customWaypoints = [];
+                
+                // Remove station marker
+                if (markers.station) {
+                    markers.station.remove();
+                    markers.station = null;
+                }
+                
+                // Remove dock marker
+                if (markers.dock) {
+                    markers.dock.remove();
+                    markers.dock = null;
+                }
+                
+                // Remove path line
+                if (pathLine) {
+                    pathLine.remove();
+                    pathLine = null;
+                }
+                
+                // Remove range rings
+                rangeRings.forEach(ring => ring.remove());
+                rangeRings = [];
+                
+                // Remove heading indicator
+                if (headingIndicator) {
+                    headingIndicator.remove();
+                    headingIndicator = null;
+                }
+            }
+            
+            // Add custom waypoint from map click
+            function addCustomWaypoint(lat, lng, name) {
+                const index = markers.customWaypoints.length + 1;
+                const marker = createWaypointMarker(lat, lng, name, `C${index}`, true);
+                markers.customWaypoints.push(marker);
+                
+                // Save waypoint to server
+                fetch('/add-waypoint', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        lat: lat,
+                        lng: lng,
+                        name: name
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status !== 'success') {
+                        console.error('Error saving waypoint:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error saving waypoint:', error));
+                
+                return marker;
+            }
+            
+            // Initialize map when missions data is loaded
+            fetch('/missions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        initializeMap(data.missions);
+                    }
+                })
+                .catch(error => console.error('Error loading missions for map:', error));
+            
+            // Toggle range rings
+            rangeRingsToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    // Re-add range rings
+                    if (markers.station) {
+                        const pos = markers.station.getLatLng();
+                        addRangeRing(pos.lat, pos.lng, 50);
+                    }
+                } else {
+                    // Remove range rings
+                    rangeRings.forEach(ring => ring.remove());
+                    rangeRings = [];
+                }
+            });
+            
+            // Toggle bearing indicators
+            bearingToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    // Re-add heading indicator for USV
+                    if (markers.usv) {
+                        fetch('/usv-state')
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    updateUSVMarker(data.usv_state);
+                                }
+                            });
+                    }
+                } else {
+                    // Remove heading indicator
+                    if (headingIndicator) {
+                        headingIndicator.remove();
+                        headingIndicator = null;
+                    }
+                }
+            });
+            
+            // Add waypoint button
+            addWaypointBtn.addEventListener('click', function() {
+                if (addingWaypoint) {
+                    // Cancel adding waypoint
+                    addingWaypoint = false;
+                    this.textContent = 'Add Waypoint';
+                    this.classList.remove('btn-danger');
+                    this.classList.add('btn-outline-primary');
+                    map.off('click');
+                } else {
+                    // Start adding waypoint
+                    addingWaypoint = true;
+                    this.textContent = 'Cancel';
+                    this.classList.remove('btn-outline-primary');
+                    this.classList.add('btn-danger');
+                    
+                    map.once('click', function(e) {
+                        const name = prompt('Enter a name for this waypoint:', 'Custom Waypoint');
+                        if (name) {
+                            addCustomWaypoint(e.latlng.lat, e.latlng.lng, name);
+                        }
+                        
+                        // Reset button
+                        addWaypointBtn.textContent = 'Add Waypoint';
+                        addWaypointBtn.classList.remove('btn-danger');
+                        addWaypointBtn.classList.add('btn-outline-primary');
+                        addingWaypoint = false;
+                    });
+                }
+            });
+            
+            // Manual add waypoint button
+            manualAddWaypointBtn.addEventListener('click', function() {
+                const name = waypointNameInput.value.trim() || 'Custom Waypoint';
+                const lat = parseFloat(waypointLatInput.value);
+                const lng = parseFloat(waypointLngInput.value);
+                
+                if (isNaN(lat) || isNaN(lng)) {
+                    alert('Please enter valid latitude and longitude values.');
+                    return;
+                }
+                
+                addCustomWaypoint(lat, lng, name);
+                
+                // Clear inputs
+                waypointNameInput.value = '';
+                waypointLatInput.value = '';
+                waypointLngInput.value = '';
+            });
+            
+            // Clear custom waypoints button
+            clearWaypointsBtn.addEventListener('click', function() {
+                markers.customWaypoints.forEach(marker => marker.remove());
+                markers.customWaypoints = [];
+            });
+        });
+    </script>
+</body>
+</html>

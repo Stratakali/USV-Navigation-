@@ -1,0 +1,89 @@
+2025-04-02 00:33:24,864 - __main__ - INFO - Starting USV mission planner simulation
+2025-04-02 00:33:24,864 - planners.mission_manager - INFO - Mission Manager initialized
+2025-04-02 00:33:24,864 - __main__ - INFO - Initialized USV simulator at (37.7749, -122.4194) with heading 0.0°
+2025-04-02 00:33:24,864 - missions.waypoint_mission - INFO - Created waypoint mission with 5 waypoints
+2025-04-02 00:33:24,865 - planners.mission_manager - INFO - Added waypoint mission with 5 points to queue
+2025-04-02 00:33:24,865 - missions.station_keeping - INFO - Created station keeping mission at (37.7955, -122.3828)
+2025-04-02 00:33:24,865 - planners.mission_manager - INFO - Added station keeping mission at (37.7955, -122.3828) to queue
+2025-04-02 00:33:24,865 - missions.docking - INFO - Created docking mission to dock at (37.7749, -122.4194) with heading 270.0°
+2025-04-02 00:33:24,865 - missions.docking - INFO - Approach position: (37.774899999781205, -122.41917244561247)
+2025-04-02 00:33:24,865 - planners.mission_manager - INFO - Added docking mission at (37.7749, -122.4194) to queue
+2025-04-02 00:33:24,865 - planners.mission_manager - INFO - Starting waypoint mission
+2025-04-02 00:33:24,865 - planners.mission_manager - INFO - Mission execution started
+2025-04-02 00:33:25,004 - missions.waypoint_mission - INFO - Reached waypoint 0 at (37.7749, -122.4194)
+2025-04-02 00:33:25,004 - missions.waypoint_mission - INFO - Moving to waypoint 1: (37.8045, -122.4159)
+2025-04-02 00:42:20,333 - __main__ - INFO - Starting USV mission planner simulation
+2025-04-02 00:42:20,334 - planners.mission_manager - INFO - Mission Manager initialized
+2025-04-02 00:42:20,334 - __main__ - INFO - Initialized USV simulator at (37.7749, -122.4194) with heading 0.0°
+2025-04-02 00:42:20,335 - missions.waypoint_mission - INFO - Created waypoint mission with 5 waypoints
+2025-04-02 00:42:20,335 - planners.mission_manager - INFO - Added waypoint mission with 5 points to queue
+2025-04-02 00:42:20,335 - missions.station_keeping - INFO - Created station keeping mission at (37.7955, -122.3828)
+2025-04-02 00:42:20,335 - planners.mission_manager - INFO - Added station keeping mission at (37.7955, -122.3828) to queue
+2025-04-02 00:42:20,336 - missions.docking - INFO - Created docking mission to dock at (37.7749, -122.4194) with heading 270.0°
+2025-04-02 00:42:20,336 - missions.docking - INFO - Approach position: (37.774899999781205, -122.41917244561247)
+2025-04-02 00:42:20,336 - planners.mission_manager - INFO - Added docking mission at (37.7749, -122.4194) to queue
+2025-04-02 00:42:20,336 - planners.mission_manager - INFO - Starting waypoint mission
+2025-04-02 00:42:20,336 - planners.mission_manager - INFO - Mission execution started
+2025-04-02 00:42:20,596 - missions.waypoint_mission - INFO - Reached waypoint 0 at (37.7749, -122.4194)
+2025-04-02 00:42:20,596 - missions.waypoint_mission - INFO - Moving to waypoint 1: (37.8045, -122.4159)
+2025-04-02 00:43:39,632 - __main__ - INFO - Final mission manager status: {'status': 'RUNNING', 'missions_queued': 2, 'current_position': (37.77665413287267, -122.41919267446123), 'current_heading': 5.3374886814717115, 'missions_completed': 0, 'active_mission': {'type': 'waypoint', 'running_time': 79.29592037200928}}
+2025-04-02 01:07:56,102 - __main__ - INFO - Starting USV mission planner simulation
+2025-04-02 01:07:56,102 - planners.mission_manager - INFO - Mission Manager initialized
+2025-04-02 01:07:56,102 - __main__ - INFO - Initialized USV simulator at (37.7749, -122.4194) with heading 0.0°
+2025-04-02 01:07:56,103 - missions.waypoint_mission - INFO - Created waypoint mission with 5 waypoints
+2025-04-02 01:07:56,103 - planners.mission_manager - INFO - Added waypoint mission with 5 points to queue
+2025-04-02 01:07:56,103 - missions.station_keeping - INFO - Created station keeping mission at (37.7955, -122.3828)
+2025-04-02 01:07:56,103 - planners.mission_manager - INFO - Added station keeping mission at (37.7955, -122.3828) to queue
+2025-04-02 01:07:56,103 - missions.docking - INFO - Created docking mission to dock at (37.7749, -122.4194) with heading 270.0°
+2025-04-02 01:07:56,103 - missions.docking - INFO - Approach position: (37.774899999781205, -122.41917244561247)
+2025-04-02 01:07:56,103 - planners.mission_manager - INFO - Added docking mission at (37.7749, -122.4194) to queue
+2025-04-02 01:07:56,103 - planners.mission_manager - INFO - Starting waypoint mission
+2025-04-02 01:07:56,103 - planners.mission_manager - INFO - Mission execution started
+2025-04-02 01:07:56,104 - missions.waypoint_mission - INFO - Reached waypoint 0 at (37.7749, -122.4194)
+2025-04-02 01:07:56,104 - missions.waypoint_mission - INFO - Moving to waypoint 1: (37.8045, -122.4159)
+2025-04-02 01:08:06,204 - __main__ - INFO - Final mission manager status: {'status': 'RUNNING', 'missions_queued': 2, 'current_position': (37.77665413287267, -122.41919267446123), 'current_heading': 5.3374886814717115, 'missions_completed': 0, 'active_mission': {'type': 'waypoint', 'running_time': 10.100637197494507}}
+2025-04-02 01:10:15,456 - __main__ - INFO - Starting USV mission planner simulation
+2025-04-02 01:10:15,456 - planners.mission_manager - INFO - Mission Manager initialized
+2025-04-02 01:10:15,456 - __main__ - INFO - Initialized USV simulator at (37.7749, -122.4194) with heading 0.0°
+2025-04-02 01:10:15,457 - missions.waypoint_mission - INFO - Created waypoint mission with 5 waypoints
+2025-04-02 01:10:15,457 - planners.mission_manager - INFO - Added waypoint mission with 5 points to queue
+2025-04-02 01:10:15,457 - missions.station_keeping - INFO - Created station keeping mission at (37.7955, -122.3828)
+2025-04-02 01:10:15,457 - planners.mission_manager - INFO - Added station keeping mission at (37.7955, -122.3828) to queue
+2025-04-02 01:10:15,457 - missions.docking - INFO - Created docking mission to dock at (37.7749, -122.4194) with heading 270.0°
+2025-04-02 01:10:15,457 - missions.docking - INFO - Approach position: (37.774899999781205, -122.41917244561247)
+2025-04-02 01:10:15,457 - planners.mission_manager - INFO - Added docking mission at (37.7749, -122.4194) to queue
+2025-04-02 01:10:15,457 - planners.mission_manager - INFO - Starting waypoint mission
+2025-04-02 01:10:15,458 - planners.mission_manager - INFO - Mission execution started
+2025-04-02 01:10:15,458 - missions.waypoint_mission - INFO - Reached waypoint 0 at (37.7749, -122.4194)
+2025-04-02 01:10:15,458 - missions.waypoint_mission - INFO - Moving to waypoint 1: (37.8045, -122.4159)
+2025-04-02 01:10:25,614 - __main__ - INFO - Final mission manager status: {'status': 'RUNNING', 'missions_queued': 2, 'current_position': (37.77665413287267, -122.41919267446123), 'current_heading': 5.3374886814717115, 'missions_completed': 0, 'active_mission': {'type': 'waypoint', 'running_time': 10.156748533248901}}
+2025-04-02 01:26:08,993 - __main__ - INFO - Starting USV mission planner simulation
+2025-04-02 01:26:08,993 - planners.mission_manager - INFO - Mission Manager initialized
+2025-04-02 01:26:08,993 - __main__ - INFO - Initialized USV simulator at (37.7749, -122.4194) with heading 0.0°
+2025-04-02 01:26:08,994 - missions.waypoint_mission - INFO - Created waypoint mission with 5 waypoints
+2025-04-02 01:26:08,994 - planners.mission_manager - INFO - Added waypoint mission with 5 points to queue
+2025-04-02 01:26:08,994 - missions.station_keeping - INFO - Created station keeping mission at (37.7955, -122.3828)
+2025-04-02 01:26:08,994 - planners.mission_manager - INFO - Added station keeping mission at (37.7955, -122.3828) to queue
+2025-04-02 01:26:08,994 - missions.docking - INFO - Created docking mission to dock at (37.7749, -122.4194) with heading 270.0°
+2025-04-02 01:26:08,994 - missions.docking - INFO - Approach position: (37.774899999781205, -122.41917244561247)
+2025-04-02 01:26:08,994 - planners.mission_manager - INFO - Added docking mission at (37.7749, -122.4194) to queue
+2025-04-02 01:26:08,994 - planners.mission_manager - INFO - Starting waypoint mission
+2025-04-02 01:26:08,995 - planners.mission_manager - INFO - Mission execution started
+2025-04-02 01:26:08,995 - missions.waypoint_mission - INFO - Reached waypoint 0 at (37.7749, -122.4194)
+2025-04-02 01:26:08,995 - missions.waypoint_mission - INFO - Moving to waypoint 1: (37.8045, -122.4159)
+2025-04-02 01:26:19,104 - __main__ - INFO - Final mission manager status: {'status': 'RUNNING', 'missions_queued': 2, 'current_position': (37.77665413287267, -122.41919267446123), 'current_heading': 5.3374886814717115, 'missions_completed': 0, 'active_mission': {'type': 'waypoint', 'running_time': 10.109616994857788}}
+2025-04-02 01:27:54,068 - __main__ - INFO - Starting USV mission planner simulation
+2025-04-02 01:27:54,068 - planners.mission_manager - INFO - Mission Manager initialized
+2025-04-02 01:27:54,068 - __main__ - INFO - Initialized USV simulator at (37.7749, -122.4194) with heading 0.0°
+2025-04-02 01:27:54,068 - missions.waypoint_mission - INFO - Created waypoint mission with 5 waypoints
+2025-04-02 01:27:54,068 - planners.mission_manager - INFO - Added waypoint mission with 5 points to queue
+2025-04-02 01:27:54,069 - missions.station_keeping - INFO - Created station keeping mission at (37.7955, -122.3828)
+2025-04-02 01:27:54,069 - planners.mission_manager - INFO - Added station keeping mission at (37.7955, -122.3828) to queue
+2025-04-02 01:27:54,069 - missions.docking - INFO - Created docking mission to dock at (37.7749, -122.4194) with heading 270.0°
+2025-04-02 01:27:54,069 - missions.docking - INFO - Approach position: (37.774899999781205, -122.41917244561247)
+2025-04-02 01:27:54,069 - planners.mission_manager - INFO - Added docking mission at (37.7749, -122.4194) to queue
+2025-04-02 01:27:54,069 - planners.mission_manager - INFO - Starting waypoint mission
+2025-04-02 01:27:54,069 - planners.mission_manager - INFO - Mission execution started
+2025-04-02 01:27:54,070 - missions.waypoint_mission - INFO - Reached waypoint 0 at (37.7749, -122.4194)
+2025-04-02 01:27:54,070 - missions.waypoint_mission - INFO - Moving to waypoint 1: (37.8045, -122.4159)
+2025-04-02 01:28:04,164 - __main__ - INFO - Final mission manager status: {'status': 'RUNNING', 'missions_queued': 2, 'current_position': (37.77665413287267, -122.41919267446123), 'current_heading': 5.3374886814717115, 'missions_completed': 0, 'active_mission': {'type': 'waypoint', 'running_time': 10.094704151153564}}
